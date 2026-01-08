@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KRISHI SARATHI - Advisory Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #34d399;
+            --accent-color: #059669;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url("imm1bg.jpeg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: #E2E8F0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(71, 85, 105, 0.45);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+            backdrop-filter: blur(6px);
+        }
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #4ade80, #86efac);
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.9rem 1.4rem;
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+            z-index: 100;
+            display: none;
+            transition: all 0.25s ease-in-out;
+            font-weight: 600;
+        }
+        #secondaryAdvice ul { margin-left: 1rem; }
+        #secondaryAdvice li { margin-bottom: 0.45rem; line-height: 1.4; }
+        @media (max-width: 768px) {
+            .container-card { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900">
+    <div id="messageBox" class="message-box"></div>
+
+    <header class="bg-slate-800/80 backdrop-blur-sm shadow-xl sticky top-0 z-10 border-b border-green-600/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl text-green-400">🌱</span>
+                <span class="text-2xl font-extrabold gradient-text tracking-wider">KRISHI SARATHI</span>
+            </div>
+            <div id="auth-nav-links" class="flex items-center space-x-3 text-sm">
+                <a href="index.html" class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition duration-150 text-sm font-medium">Home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <section id="advisory" class="py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text mb-2">Real-Time Weather & Crop Recommendations</h2>
+                <p class="text-gray-400 text-md">Enter your city or use your location — get 2–3 crop suggestions with quick Wikipedia summaries.</p>
+            </div>
+
+            <div class="container-card max-w-5xl mx-auto">
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <input type="text" id="cityInput" placeholder="Enter City Name (e.g., Pune, Mumbai)"
+                        class="flex-grow p-3 rounded-xl bg-slate-700 border-2 border-slate-600 text-white placeholder-gray-400 text-lg focus:ring-green-500 focus:border-green-500 shadow-inner">
+                    <div class="flex space-x-2">
+                        <button id="detectLocationBtn" title="Detect my location"
+                            class="px-4 py-3 bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition">Use My Location</button>
+                        <button id="advisoryButton"
+                            class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition">Get Advisory</button>
+                    </div>
+                </div>
+
+                <div id="resultsSection" class="mt-8 p-6 bg-slate-700/50 rounded-xl border border-slate-600 hidden transition-all duration-500">
+                    <h3 class="text-2xl font-bold mb-3 text-green-400 border-b border-green-700/40 pb-2">Current Weather Status</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-200 mb-6">
+                        <div><span class="block text-sm font-medium text-green-300">Temperature</span><span id="temp" class="text-2xl font-bold">--</span></div>
+                        <div><span class="block text-sm font-medium text-green-300">Condition</span><span id="condition" class="text-2xl font-bold">--</span></div>
+                        <div><span class="block text-sm font-medium text-green-300">Humidity</span><span id="humidity" class="text-2xl font-bold">--</span></div>
+                        <div><span class="block text-sm font-medium text-green-300">Wind</span><span id="wind" class="text-2xl font-bold">--</span></div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold mb-4 gradient-text" id="advisoryTitle">Crop Advisory Details</h3>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1">
+                            <img id="cropImage" src="https://placehold.co/400x300/10b981/ffffff?text=CROPS" alt="Representative" class="rounded-lg shadow-xl w-full h-auto object-cover border-4 border-slate-600 aspect-[4/3]" />
+                            <p id="cropNameDisplay" class="text-center text-md text-gray-400 mt-3 font-semibold">Top Crop Suggestions</p>
+                        </div>
+
+                        <div class="md:col-span-2 space-y-4">
+                            <div id="primaryAdviceContainer" class="p-4 rounded-xl bg-red-900/30 border-2 border-red-700/30">
+                                <h4 class="font-bold text-lg text-red-300 mb-1 flex items-center"><span class="mr-2 text-2xl">🚨</span> Primary Action</h4>
+                                <p id="primaryAdvice" class="text-base text-gray-200">Analyzing conditions...</p>
+                            </div>
+
+                            <div id="cropSuggestionsContainer" class="p-4 rounded-xl bg-sky-900/30 border-2 border-sky-700/30">
+                                <h4 class="font-bold text-lg text-sky-300 mb-2 flex items-center"><span class="mr-2 text-2xl">🌾</span> Recommended Crops</h4>
+                                <div id="cropSuggestions" class="text-base text-gray-300">
+                                    <p class="text-sm text-gray-400">Suggestions will appear here.</p>
+                                </div>
+                            </div>
+
+                            <div id="secondaryAdviceContainer" class="p-4 rounded-xl bg-slate-800/30 border-2 border-slate-700/30">
+                                <h4 class="font-bold text-lg text-green-300 mb-1 flex items-center"><span class="mr-2 text-2xl">🛠️</span> Methodological Advice</h4>
+                                <div id="secondaryAdvice" class="text-base text-gray-300">
+                                    <p class="text-sm text-gray-400">General farming strategies and crop-specific notes will appear here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <hr class="border-t border-slate-700/50 my-10">
+
+        <section id="contact" class="py-8">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text mb-2">Get in Touch</h2>
+            </div>
+            <div class="container-card max-w-lg mx-auto">
+                <form id="contactForm" class="space-y-4">
+                    <div>
+                        <label for="emailInput" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                        <input type="email" id="emailInput" required
+                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-gray-400 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label for="messageInput" class="block text-sm font-medium text-gray-300 mb-2">Your Message</label>
+                        <textarea id="messageInput" rows="4" required
+                            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-white focus:ring-green-500 focus:border-green-500"></textarea>
+                    </div>
+                    <button type="submit"
+                        class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800/80 mt-12 py-6 border-t border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            <p>&copy; 2024 KRISHI SARATHI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script-advisory.js"></script>
+</body>
+</html>
